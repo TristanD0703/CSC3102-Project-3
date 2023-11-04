@@ -436,16 +436,40 @@ public class Graph<E extends Comparable<E>> implements GraphAPI<E>
    public boolean isEdge(E fromKey, E toKey)
    {
       //implement this function
+      Vertex matchingVertex = first;
 
-      return  false;
+      //find the Vertex that contains the data object matching the fromKey object
+      while(matchingVertex != null && cmp.compare(matchingVertex.data, fromKey) != 0){
+         matchingVertex = matchingVertex.pNextVertex;
+      }
+
+      //iterate through that Vertex's Edge list to check if one of them connects to a Vertex containing data
+      //matching toKey
+      Edge curEdge = matchingVertex.pEdge;
+      while(curEdge != null){
+         if(cmp.compare(curEdge.destination.data, toKey) == 0){
+            return true;
+         }
+         curEdge = curEdge.pNextEdge;
+      }
+      //if all Edges contained inside Vertex are exhausted, the Edge does not exist.
+      return false;
    }
 
    @Override
    public long countEdges()
    {
       //implement this method
-
-      return 0;
+      long count = 0;
+      Vertex curVertex = first;
+      while(curVertex != null){
+         Edge curEdge = curVertex.pEdge;
+         while(curEdge != null){
+            curEdge = curEdge.pNextEdge;
+            count++;
+         }
+      }
+      return count;
    }
    
 /***------------------  END AUGEMENTED METHOD ----------------***/

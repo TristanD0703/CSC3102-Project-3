@@ -374,8 +374,8 @@ public class GraphExplorer
          
    /**
     * Generates a topological labeling of the specified digraph, in reverse order,
-    * using the decrease-and-conquer algorithm that successively selects and r 
-    * emoves a vertex of out-degree 0 until all the vertices are selected. 
+    * using the decrease-and-conquer algorithm that successively selects and  
+    * removes a vertex of out-degree 0 until all the vertices are selected. 
     * The graph is explored in lexicographical order when adding a new vertex to the  
     * topological ordering and the graph is not modified. Updates of the degrees 
     * and vertices that are selected are tracked using auxiliary data structures. 
