@@ -45,7 +45,14 @@ public class GraphExplorer
       //and advances the cursor to the next line. This function will be used
       //as an argument to bfsTraverse and dfsTraverse and to display the 
       //topological listing of the vertices.
-      //Function<City,PrintStream> f = ...;	  
+      //Function<City,PrintStream> f = ...;	 
+      Function<City, PrintStream> f = new Function<City, PrintStream>(){
+        public PrintStream apply(City c){
+            System.out.println(c.getKey() + "\t" + c.getLabel()); 
+            return null;
+        }
+      };
+
       Graph<City> g = readGraph(args[0]);      
       long s = g.size();
       menuReturnValue = -1;
