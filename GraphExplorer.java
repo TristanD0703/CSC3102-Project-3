@@ -284,8 +284,30 @@ public class GraphExplorer
    private static int[][] genIncMatUDG(Graph<City> g)  throws GraphException
    {
 	  //Implement this method
-	  
-      return null;
+      long numEdges = g.countEdges();
+      long numVertices = g.size();
+      if(numEdges == 0){
+        return null;
+      }
+	  int[][] incidenceMatrix = new int[(int)numVertices][(int)numEdges];
+
+      int currentEdge = 0;
+      //loop through all the vertices...
+      for(int vertexNum = 0; vertexNum < numVertices; vertexNum++){
+        City currentCity = new City(vertexNum);
+        //from the current vertex through all the other vertecies, check if they are connected by an edge
+        for(int otherVertex = 0; otherVertex < numVertices; otherVertex++){
+            City otherCity = new City(otherVertex);
+            //if they are connected, update the matrix accordingly
+            if(g.isEdge(currentCity, otherCity)){
+                incidenceMatrix[vertexNum][currentEdge] = 1;
+                incidenceMatrix[otherVertex][currentEdge] = -1;
+                currentEdge++;
+            }
+        }
+      }
+
+      return incidenceMatrix;
    }
    
    /**
@@ -375,7 +397,12 @@ public class GraphExplorer
       //implement this method	   
       /*Defining an instance of the PriorityQueue class that uses the comparator above
         and complete the implementation of the algorithm */
+       PriorityQueue<EdgeType> edgeList = new PriorityQueue<EdgeType>(cmp);
+       for(int i = 0; i < g.size(); i++){
+            for(int j = i+1; j < g.size(); j++){
 
+            }
+       }
       return 0;
    }         
          
