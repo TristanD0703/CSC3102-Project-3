@@ -442,6 +442,9 @@ public class Graph<E extends Comparable<E>> implements GraphAPI<E>
       while(matchingVertex != null && cmp.compare(matchingVertex.data, fromKey) != 0){
          matchingVertex = matchingVertex.pNextVertex;
       }
+      if(matchingVertex == null){
+         return false;
+      }
 
       //iterate through that Vertex's Edge list to check if one of them connects to a Vertex containing data
       //matching toKey
@@ -468,6 +471,7 @@ public class Graph<E extends Comparable<E>> implements GraphAPI<E>
             curEdge = curEdge.pNextEdge;
             count++;
          }
+         curVertex = curVertex.pNextVertex;
       }
       return count;
    }

@@ -293,20 +293,19 @@ public class GraphExplorer
 
       int currentEdge = 0;
       //loop through all the vertices...
-      for(int vertexNum = 0; vertexNum < numVertices; vertexNum++){
+      for(int vertexNum = 1; vertexNum <= numVertices; vertexNum++){
         City currentCity = new City(vertexNum);
         //from the current vertex through all the other vertecies, check if they are connected by an edge
-        for(int otherVertex = 0; otherVertex < numVertices; otherVertex++){
+        for(int otherVertex = 1; otherVertex <= numVertices; otherVertex++){
             City otherCity = new City(otherVertex);
             //if they are connected, update the matrix accordingly
             if(g.isEdge(currentCity, otherCity)){
-                incidenceMatrix[vertexNum][currentEdge] = 1;
-                incidenceMatrix[otherVertex][currentEdge] = -1;
+                incidenceMatrix[vertexNum - 1][currentEdge] = 1;
+                incidenceMatrix[otherVertex - 1][currentEdge] = -1;
                 currentEdge++;
             }
         }
       }
-
       return incidenceMatrix;
    }
    
