@@ -303,6 +303,9 @@ public class GraphExplorer
                 incidenceMatrix[vertexNum - 1][currentEdge] = 1;
                 incidenceMatrix[otherVertex - 1][currentEdge] = -1;
                 currentEdge++;
+                if(currentEdge > numEdges){
+                    return incidenceMatrix;
+                }
             }
         }
       }
@@ -317,8 +320,37 @@ public class GraphExplorer
    private static boolean isStronglyConnected(Graph<City> g)  throws GraphException
    {
       //Implement this method
-	  
-      return false;
+	  boolean[] verticesVisited = new boolean[(int)g.size()];
+      Queue<City> verticesToVisit = new PriorityQueue<City>();
+
+      boolean allNodesVisited = true;
+      int currentVertex = 1;
+      while(currentVertex <= g.size() && allNodesVisited){
+        //start at the first node
+        verticesToVisit.add(new City(currentVertex));
+        while(!verticesToVisit.isEmpty()){
+            //pop the stack and mark that node as visited
+            City currentCity = verticesToVisit.remove();
+            verticesVisited[currentCity.getKey() - 1] = true;
+            //check for edges that connect it to other nodes. if there is a node connected to it add it to the stack
+            for(int otherVertex = 1; otherVertex <= g.size(); otherVertex++){
+                City otherCity = new City(otherVertex);
+                if(g.isEdge(currentCity, otherCity) && verticesVisited[otherVertex - 1] == false){
+                    verticesToVisit.add(otherCity);
+                }
+            }
+        }
+
+        //If all of the nodes have been visited, return true. Otherwise return false. 
+        for(int i = 0; i < verticesVisited.length; i++){
+            if(verticesVisited[i] == false){
+                allNodesVisited = false;
+            }
+        }
+        verticesVisited = new boolean[(int)g.size()];
+        currentVertex++;
+      }
+      return allNodesVisited;
    }
 
    /**
@@ -420,6 +452,7 @@ public class GraphExplorer
    private static boolean topSortOutDeg(Graph<City> g, int linearOrder[]) throws GraphException
    {
       //Implement this method, out-degree-based topological sort
+
 
        return false;
    }
