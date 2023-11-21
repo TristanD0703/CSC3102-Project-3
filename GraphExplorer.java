@@ -137,6 +137,7 @@ public class GraphExplorer
 					// 13  San Lorenzo
 					// :   :
 					// :   :
+                    System.out.println(Arrays.toString(top));
                     System.out.println("===============================================================");
                  }
                  else
@@ -384,6 +385,7 @@ public class GraphExplorer
     * algorithm. If no such MST exists, then it generates a minimum spanning forest.
     * @param g a weighted directed graph
     * @param parent the parent implementation of the minimum spanning tree/forest
+ * @param O 
     * @return the weight of such a tree or forest.
     * @throws GraphException when this graph is empty
     * <pre>
@@ -431,7 +433,13 @@ public class GraphExplorer
        PriorityQueue<EdgeType> edgeList = new PriorityQueue<EdgeType>(cmp);
        for(int i = 0; i < g.size(); i++){
             for(int j = i+1; j < g.size(); j++){
-
+                if(g.isEdge(new City(i), new City(j))){
+                    EdgeType edgeToAdd = new EdgeType();
+                    edgeToAdd.source = i;
+                    edgeToAdd.destination = j;
+                    edgeToAdd.weight = g.retrieveEdge(new City(i), new City(j));
+                    edgeList.add(edgeToAdd);
+                }
             }
        }
       return 0;
@@ -452,9 +460,54 @@ public class GraphExplorer
    private static boolean topSortOutDeg(Graph<City> g, int linearOrder[]) throws GraphException
    {
       //Implement this method, out-degree-based topological sort
+        //start at the first city in the list
+        //look at it's out-degree neighbors - if one is already in the queue, return false since there is a cycle
+        //if there no neighbors are in the queue already, push them in lexicographical order
+        //repeat until 0 out degree is found
+        //going backwards in the array, put the City key values into the array
+        //repeat this until all Cities are visited
+        //return true at the end since the method was able to produce a topological ordering
+        Stack<City> citiesToVisit = new Stack<City>();
+        City currentCity = new City(1);
+        citiesToVisit.push(currentCity);
+        int totalCities = (int)g.size(), visitedAmount = 0;
+        boolean[] visitedCities = new boolean[totalCities];
 
+        while(visitedAmount < totalCities){
+            if(citiesToVisit.isEmpty()){
+                for(int i = 0; i < totalCities; i++){
+                    if(!visitedCities[i]){
+                        currentCity = new City(i + 1);
+                        break;
+                    }    
+                }
+            }
+            while(g.outDegree(currentCity) > 0){
+                for(int i = 1; i <= totalCities; i++){
+                    City otherCity = new City(i);
+                    if(g.isEdge(currentCity, otherCity) && !visitedCities[i - 1]){
+                        for(int j = 0; j < citiesToVisit.size(); j++){
+                            if(otherCity.compareTo(citiesToVisit.get(j)) == 0){
+                                return false;
+                            }
+                        }
+                        citiesToVisit.push(otherCity);
+                        currentCity = otherCity;
+                        break;
+                    }
+                }
+                currentCity = citiesToVisit.pop();
+                visitedCities[currentCity.getKey() - 1] = true;
+                visitedAmount++;
+                linearOrder[totalCities - visitedAmount] = currentCity.getKey();
+            }
+            currentCity = citiesToVisit.pop();
+            visitedCities[currentCity.getKey() - 1] = true;
+            visitedAmount++;
+            linearOrder[totalCities - visitedAmount] = currentCity.getKey();
+        }
 
-       return false;
+       return true;
    }
 }
 
