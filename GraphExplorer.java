@@ -29,6 +29,7 @@ public class GraphExplorer
 {
    public static final Double INFINITY = Double.POSITIVE_INFINITY;
    public static final Integer NIL = -1;
+   public static int count;
 
    public static void main(String []args) throws GraphException
    {
@@ -92,6 +93,7 @@ public class GraphExplorer
                // 1     Charlottetown
                // 4     Halifax
                // 2     Edmonton     
+               g.bfsTraverse(f);
 
                System.out.println("===============================================================");
                System.out.println();
@@ -102,6 +104,7 @@ public class GraphExplorer
                // 1     Charlottetown
                // 4     Halifax
                // 2     Edmonton     
+               g.dfsTraverse(f);
 
                System.out.println("===============================================================");
                System.out.println();
@@ -137,6 +140,10 @@ public class GraphExplorer
 					// 13  San Lorenzo
 					// :   :
 					// :   :
+                    for(int k = 0; k < top.length; k++){
+                        City currentCity = g.retrieveVertex(new City(top[k]));
+                        System.out.println(currentCity.getKey() + "\t" + currentCity.getLabel());
+                    }
                     System.out.println(Arrays.toString(top));
                     System.out.println("===============================================================");
                  }
@@ -345,13 +352,13 @@ public class GraphExplorer
         //If all of the nodes have been visited, return true. Otherwise return false. 
         for(int i = 0; i < verticesVisited.length; i++){
             if(verticesVisited[i] == false){
-                allNodesVisited = false;
+                return false;
             }
         }
         verticesVisited = new boolean[(int)g.size()];
         currentVertex++;
       }
-      return allNodesVisited;
+      return true;
    }
 
    /**
@@ -365,7 +372,11 @@ public class GraphExplorer
    public static void trUnion(int i, int j, int[] parent)
    {
        //Implement this function
-
+        int sourceRoot = find(parent, i);
+        int destinationRoot = find(parent, j);
+        if(sourceRoot != destinationRoot){
+          parent[destinationRoot - 1] = sourceRoot;  
+        }
    }
 
    /**
@@ -377,8 +388,10 @@ public class GraphExplorer
    private static int find(int[] parent, int v)
    {
        //implement this method
-	   
-       return -1;
+	    while(parent[v - 1] != -1){
+            v = parent[v - 1];
+        }
+        return v;
    }
    /**
     * This method generates a minimum spanning tree using Kruskal's 
@@ -403,16 +416,15 @@ public class GraphExplorer
         * about an edge for the MST algorithm
         * 
         */
-       class EdgeType
-       {
+        class EdgeType
+        {
            public double weight;
            public int source;
            public int destination;
-           public boolean chosen;
-       }       
+        }       
        /* An EdgeType comparator */
-       Comparator<EdgeType> cmp = (t1, t2) -> 
-       {
+        Comparator<EdgeType> cmp = (t1, t2) -> 
+        {
            if (t1.weight < t2.weight)
                return -1;
            if (t1.weight > t2.weight)
@@ -426,13 +438,17 @@ public class GraphExplorer
            if (t1.destination > t2.destination)
                return 1;
            return 0;        
-       };
+        };
       //implement this method	   
       /*Defining an instance of the PriorityQueue class that uses the comparator above
         and complete the implementation of the algorithm */
-       PriorityQueue<EdgeType> edgeList = new PriorityQueue<EdgeType>(cmp);
-       for(int i = 0; i < g.size(); i++){
-            for(int j = i+1; j < g.size(); j++){
+        for(int i = 0; i < parent.length; i++){
+            parent[i] = -1;
+        }
+        boolean[] inTree = new boolean[(int)g.size()];
+        PriorityQueue<EdgeType> edgeList = new PriorityQueue<EdgeType>(cmp);
+        for(int i = 1; i <= g.size(); i++){
+            for(int j = i+1; j <= g.size(); j++){
                 if(g.isEdge(new City(i), new City(j))){
                     EdgeType edgeToAdd = new EdgeType();
                     edgeToAdd.source = i;
@@ -441,8 +457,33 @@ public class GraphExplorer
                     edgeList.add(edgeToAdd);
                 }
             }
-       }
-      return 0;
+        }
+        int weight = 0;
+        while(!edgeList.isEmpty()){
+            EdgeType currentEdge = edgeList.remove();
+            if(!inTree[currentEdge.source - 1] && !inTree[currentEdge.destination - 1]){
+                parent[currentEdge.destination ] = currentEdge.source ;
+                weight += g.retrieveEdge(new City(currentEdge.source), new City(currentEdge.destination));
+                inTree[currentEdge.source - 1] = true;
+                inTree[currentEdge.destination - 1] = true;
+            } else if (inTree[currentEdge.source - 1] && !inTree[currentEdge.destination - 1]){
+                parent[currentEdge.destination - 1] = currentEdge.source ;
+                weight += g.retrieveEdge(new City(currentEdge.source), new City(currentEdge.destination));
+                inTree[currentEdge.destination - 1] = true;
+            } else if(!inTree[currentEdge.source - 1] && inTree[currentEdge.destination - 1]){
+                parent[currentEdge.source - 1] = currentEdge.destination ;
+                weight += g.retrieveEdge(new City(currentEdge.source), new City(currentEdge.destination));
+                inTree[currentEdge.source - 1] = true;
+            } else {
+                int sourceRoot = find(parent, currentEdge.source);
+                int destinationRoot = find(parent, currentEdge.destination );
+                if(sourceRoot != destinationRoot){
+                    trUnion(sourceRoot, destinationRoot, parent);
+                    weight += weight += g.retrieveEdge(new City(currentEdge.source), new City(currentEdge.destination));
+                }
+            }
+        }
+      return weight;
    }         
          
    /**
@@ -457,57 +498,27 @@ public class GraphExplorer
     * @return true if a topological ordering of the vertices of the specified digraph 
     * exists; otherwise, false. 
     */   
-   private static boolean topSortOutDeg(Graph<City> g, int linearOrder[]) throws GraphException
-   {
-      //Implement this method, out-degree-based topological sort
-        //start at the first city in the list
-        //look at it's out-degree neighbors - if one is already in the queue, return false since there is a cycle
-        //if there no neighbors are in the queue already, push them in lexicographical order
-        //repeat until 0 out degree is found
-        //going backwards in the array, put the City key values into the array
-        //repeat this until all Cities are visited
-        //return true at the end since the method was able to produce a topological ordering
-        Stack<City> citiesToVisit = new Stack<City>();
-        City currentCity = new City(1);
-        citiesToVisit.push(currentCity);
-        int totalCities = (int)g.size(), visitedAmount = 0;
-        boolean[] visitedCities = new boolean[totalCities];
+    private static boolean topSortOutDeg(Graph<City> g, int linearOrder[]) throws GraphException {
 
-        while(visitedAmount < totalCities){
-            if(citiesToVisit.isEmpty()){
-                for(int i = 0; i < totalCities; i++){
-                    if(!visitedCities[i]){
-                        currentCity = new City(i + 1);
-                        break;
-                    }    
-                }
+        boolean[] seen = new boolean[(int)g.size()];
+        count = (int)g.size() - 1;
+        for(int i = 1; i <= g.size(); i++){
+            if(!seen[i - 1]){
+                dfs(g, linearOrder, new City(i), seen);
             }
-            while(g.outDegree(currentCity) > 0){
-                for(int i = 1; i <= totalCities; i++){
-                    City otherCity = new City(i);
-                    if(g.isEdge(currentCity, otherCity) && !visitedCities[i - 1]){
-                        for(int j = 0; j < citiesToVisit.size(); j++){
-                            if(otherCity.compareTo(citiesToVisit.get(j)) == 0){
-                                return false;
-                            }
-                        }
-                        citiesToVisit.push(otherCity);
-                        currentCity = otherCity;
-                        break;
-                    }
-                }
-                currentCity = citiesToVisit.pop();
-                visitedCities[currentCity.getKey() - 1] = true;
-                visitedAmount++;
-                linearOrder[totalCities - visitedAmount] = currentCity.getKey();
-            }
-            currentCity = citiesToVisit.pop();
-            visitedCities[currentCity.getKey() - 1] = true;
-            visitedAmount++;
-            linearOrder[totalCities - visitedAmount] = currentCity.getKey();
         }
-
        return true;
    }
+
+    private static void dfs(Graph<City> g, int[] linearOrder, City currentCity, boolean[] visitedCities) throws GraphException{
+        visitedCities[currentCity.getKey() - 1] = true;
+        for(int i = 1; i <= g.size(); i++){
+            if(g.isEdge(currentCity, new City(i)) && !visitedCities[i - 1]){
+                dfs(g, linearOrder, new City(i), visitedCities);
+            }
+        }
+        linearOrder[count] = currentCity.getKey();
+        count--;
+    }
 }
 
